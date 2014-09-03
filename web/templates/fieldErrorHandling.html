@@ -1,0 +1,147 @@
+
+/*Template for email change - start*/
+<script type="text/ng-template" id="emailChangeContent.html">
+    <div class="modal-header">
+        <button type="button" class="close" aria-hidden="true" ng-click="emailChangeCancel()">&times;</button>  
+        <h4>Change Email Address</h4>
+    </div>
+    <div class="modal-body">
+        <div class="row">
+            <div ng-if="isformError" form-error></div>
+        </div>
+        <div class="row margin-sm-bottom">
+            <p>Your current Email Address is "<span ng-bind="userDetails.email"></span>". Enter the new Email Address and verify your password.</p>
+            <form novalidate class="form-horizontal" role="form" name="changeEmailForm">
+                <div class="form-group" ng-class="{ 'has-error' : (changeEmailForm.newEmail.$invalid && submitted) || (changeEmailForm.newEmail.$error.required && submitted)}">
+                    <label for="newEmail" class="col-sm-3 control-label text-center">New Email Address *</label>
+                    <div class="col-sm-9">
+                        <input type="email" class="form-control" id="newEmail" name="newEmail" ng-model="emailDetails.newEmail" required>
+                        <p class="help-block" ng-show="changeEmailForm.newEmail.$error.required && submitted">This field is required</p>
+                        <p class="help-block" ng-show="!changeEmailForm.newEmail.$error.required && changeEmailForm.newEmail.$invalid && submitted">Invalid Email</p>
+                    </div>
+                </div>
+                <div class="form-group" ng-class="{ 'has-error' : (changeEmailForm.confirmNewEmail.$invalid && submitted) || (confirmEmailError && submitted) || (changeEmailForm.confirmNewEmail.$error.required && submitted)}">
+                    <label for="confirmNewEmail" class="col-sm-3 control-label text-center">Confirm Email Address *</label>
+                    <div class="col-sm-9">
+                        <input type="email" class="form-control" id="confirmNewEmail" name="confirmNewEmail" ng-model="emailDetails.confirmNewEmail" required>
+                        <p class="help-block" ng-show="changeEmailForm.confirmNewEmail.$error.required && submitted">This field is required</p>
+                        <p class="help-block" ng-show="!changeEmailForm.confirmNewEmail.$error.required && changeEmailForm.confirmNewEmail.$invalid && submitted">Invalid Email</p>
+                        <p class="help-block" ng-show="!changeEmailForm.confirmNewEmail.$invalid && !changeEmailForm.confirmNewEmail.$invalid && confirmEmailError && submitted">Email does not match</p>
+                    </div>
+                </div>
+                <div class="form-group" ng-class="{ 'has-error' : (changeEmailForm.emailChangeConfirmPassword.$invalid && submitted) || invalidPassword}">
+                    <label for="emailChangeConfirmPassword" class="col-sm-3 control-label text-center">Password *</label>
+                    <div class="col-sm-9">
+                        <input type="password" class="form-control" id="emailChangeConfirmPassword" name="emailChangeConfirmPassword" ng-model="emailDetails.password" required>
+                        <p class="help-block" ng-show="changeEmailForm.emailChangeConfirmPassword.$error.required && submitted">This field is required</p>
+                        <p class="help-block" ng-show="!changeEmailForm.emailChangeConfirmPassword.$error.required && invalidPassword">Invalid password</p>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="text-center">
+            <button type="submit" class="button primary normal margin-xs-left" ng-click="emailChangeOk(changeEmailForm)">Change email address</button>
+            <span class="margin-xs-left margin-xs-right">Or</span>
+            <a href="#" ng-click="emailChangeCancel()">Cancel</a>
+        </div>
+    </div>
+</script>
+
+/*Template for email change - end*/
+
+<body np-app="error">
+	<div ng-controller="userDetailsCtlr">
+		<button type="button" ng-click="emailChange()">Change Email</button>
+	</div>
+</body>
+
+var errorApp = angular.module("error",['error.services','error.directives']);
+
+errorApp.controller('emailChangeInstanceCtrl',['$scope',function($scope){
+	$scope.userDetails = userDetails;
+
+	$scope.emailChange = function(){
+		var modalInstance = $modal.open({
+		      templateUrl: 'emailChangeContent.html',
+		      controller: 'emailChangeInstanceCtrl',
+		      windowClass: 'emailChange',
+		      resolve: {
+		    	  userDetails: function(){
+		    		  return userDetails;
+		    	  }
+		      } 
+		});
+	}
+]);
+errorApp.controller('emailChangeInstanceCtrl',['$scope','$modalInstance','$timeout','userDetails','updateEmail','errorService', 'successService', function($scope,$modalInstance,$timeout,userDetails,updateEmail,errorService,successService){
+	
+	$scope.userDetails = userDetails;
+	
+	$scope.emailDetails = {'newEmail':'','confirmNewEmail':'','password':''};
+	$scope.confirmEmailError = false;
+	$scope.invalidPassword = false;
+	
+	$scope.$watch("emailDetails.password",function(newValue, oldValue){
+	  if(!$scope.emailDetails.password){
+		  $scope.invalidPassword = false;
+	  }
+	});
+	
+	$scope.$watch("emailDetails.confirmNewEmail",function(newValue, oldValue){
+	  if($scope.emailDetails.confirmNewEmail != '' && $scope.emailDetails.newEmail != $scope.emailDetails.confirmNewEmail){
+		  $scope.confirmEmailError = true;
+	  }else{
+		  $scope.confirmEmailError = false;
+	  }
+	});
+	
+	$scope.$watch("emailDetails.newEmail",function(newValue, oldValue){
+	  if($scope.emailDetails.confirmNewEmail != '' && $scope.emailDetails.newEmail != $scope.emailDetails.confirmNewEmail){
+		  $scope.confirmEmailError = true;
+	  }else{
+		  $scope.confirmEmailError = false;
+	  }
+	});
+	
+	$scope.emailChangeOk = function(changeEmailForm){
+		$scope.changeEmailForm = changeEmailForm;
+		$scope.submitted = true;
+		$scope.isformError = false;
+		if($scope.changeEmailForm.$valid){
+			var changeEmailPromise = updateEmail($scope.emailDetails);
+			changeEmailPromise.then(function(result){
+				  if(result.isError){
+					  $scope.isformError = true;
+					  $scope.formErrorHeading = result.errors.__all__;
+					  $scope.formErrors = [];
+					  $.each(result.errors,function(key,value){
+						  if(key !== '__all__'){
+							  $scope.formErrors.push({'name':key,'value':value});
+						  }
+					  });
+				  }else{
+					  $modalInstance.close(result.successMessage);
+				  }
+			},function(reason){
+			  
+			});
+		}
+	}
+	
+	$scope.emailChangeCancel = function(){
+		$modalInstance.dismiss('cancel');
+	}
+	
+	$modalInstance.result.then(function(){
+		$scope.userDetails.email = $scope.emailDetails.newEmail;
+		successService.setSuccess('The email was successfully changed for '+ $scope.userDetails.username +' to '+$scope.emailDetails.newEmail+'.');
+	});
+	
+	$modalInstance.opened.then(function(){
+		$timeout(function(){
+			//hack - as angular killed bootstrap modal events
+			$('.emailChange').centerModal();
+		});
+		
+	});
+}]);
