@@ -1,0 +1,61 @@
+/*Sample Get Request - start*/
+services.factory('getTimeZones',['$http','$route','$q',function($http,$route,$q){
+	return function(){
+		var delay = $q.defer();
+		$http.get('/timezones/').success(function(timezones){
+			delay.resolve(timezones);
+		}).error(function(){
+			delay.reject('Unable to fetch user details');
+		});
+		return delay.promise;
+	};
+}]);
+/*Sample Get Request - end*/
+
+
+/*Sample Post Request - start*/
+services.factory('updatePassword',['$http','$route','$q',function($http,$route,$q){
+	return function(passwordDetails){
+		var delay = $q.defer();
+		$http.post('/updatepassword/',passwordDetails).success(function(result,status){
+			delay.resolve(result);
+		}).error(function(){
+			delay.reject('Unable to update password');
+		});
+		return delay.promise;
+	};
+}]);
+/*Sample Post Request - end*/
+
+
+/*controller - start*/
+var ajaxApp = angular.module("ajax",['error.services','error.directives']);
+ajaxApp.controller("ajaxCtlr",['$scope','errorService','succesService','infoService','getTimeZones','updatePassword',function($scope,errorService,successService,infoService,
+getTimeZones,updatePassword){
+	//Get the clients
+	var clientspromise =  getClients();	
+    clientspromise.then(function(result){
+		$scope.clients = result;
+	},function(reason){
+		errorService.setError(reason);
+	});
+	
+	var changePasswordPromise = updatePassword($scope.passwordDetails);
+	changePasswordPromise.then(function(result){
+		  if(result.isError){
+			  $scope.isformError = true;
+			  $scope.formErrorHeading = result.errors.__all__;
+			  $scope.formErrors = [];
+			  $.each(result.errors,function(key,value){
+				  if(key !== '__all__'){
+					  $scope.formErrors.push({'name':key,'value':value});
+				  }
+			  });
+		  }else{
+			  succesService.setSucces(result.successMessage);
+		  }
+	},function(reason){
+	  	errorService.setError(reason);
+	});
+}]);
+/*controller - end*/
