@@ -1,0 +1,187 @@
+/* Directives for ajax request/response error handling*/
+
+var directives = angular.module('error.directives', []); 
+
+directives.directive('alertError',['$parse',function($parse){
+	return {
+		restrict: 'A',
+		template: '<div class="alert alert-fail"'+
+			'ng-show="errorMessage">' +
+			'{{errorMessage}}</div>',
+		link: function(scope, element, attrs){
+			var alertMessageAttr = attrs['alertmessage'];
+			scope.errorMessage = null;
+			
+			scope.$watch(alertMessageAttr, function(newVal){
+				scope.errorMessage = newVal;
+			});
+			
+			scope.hideAlert = function(){
+				scope.errorMessage = null;
+				$parse(alertMessageAttr).assign(scope,null);
+			}
+		}	
+	};
+}]);
+
+directives.directive('alertSuccess',['$parse',function($parse){
+	return {
+		restrict: 'A',
+		template: '<div class="alert alert-success"'+
+			'ng-show="successMessage">' +
+			'{{successMessage}}</div>',
+		link: function(scope, element, attrs){
+			var alertMessageAttr = attrs['alertmessage'];
+			scope.successMessage = null;
+			
+			scope.$watch(alertMessageAttr, function(newVal){
+				scope.successMessage = newVal;
+			});
+			
+			scope.hideAlert = function(){
+				scope.successMessage = null;
+				$parse(alertMessageAttr).assign(scope,null);
+			}
+		}	
+	};
+}]);
+
+directives.directive('alertInfo',['$parse',function($parse){
+	return {
+		restrict: 'A',
+		template: '<div class="alert alert-info"'+
+			'ng-show="infoMessage">' +
+			'{{infoMessage}}</div>',
+		link: function(scope, element, attrs){
+			var alertMessageAttr = attrs['alertmessage'];
+			scope.infoMessage = null;
+			
+			scope.$watch(alertMessageAttr, function(newVal){
+				scope.infoMessage = newVal;
+			});
+			
+			scope.hideAlert = function(){
+				scope.infoMessage = null;
+				$parse(alertMessageAttr).assign(scope,null);
+			}
+		}	
+	};
+}]);
+
+
+/*Angualr Request/Response interceptors to intercept http request/responses*/
+
+var services = angular.module('error.services',['ngResource']);
+
+//Any HTTP response should come here - cannot escape this route
+services.factory('errorHttpInterceptor',function($q,$location,$window,errorService,$rootScope){
+	return function(promise){
+		return promise.then(function(response){
+			 return response;
+		},function(response){
+			if(response.status == 401){
+				$window.location.href = '/';
+			}else if(response.status == 404){
+				$window.location.href = '/404/';
+			}
+			else if(response.status >= 400 && response.status < 500){
+				if(response.status === 403){
+					errorService.setError('403 Access Denied');
+				}else{
+					errorService.setError('Internal Server Error');
+				}
+			}else if(response.status === 500){
+				errorService.setError('500 Internal Server Error');
+			}
+			return $q.reject(response);
+		});
+	}
+});
+
+services.factory('requestHttpInterceptor', function($q) {
+    return {
+      'request': function(config) {
+    	config.headers['X-Requested-With'] = 'XMLHttpRequest';
+    	config.headers['X-CSRFToken'] = $.cookie('csrftoken');
+        return config;
+      }
+    };
+});
+
+services.config(function($httpProvider){
+	$httpProvider.responseInterceptors.push('errorHttpInterceptor');
+	$httpProvider.interceptors.push('requestHttpInterceptor');
+});
+
+services.factory('errorService',function(){
+	return {
+		errorMessage: null,
+		setError: function(msg){
+			this.errorMessage = msg;
+		},
+		clear: function(){
+			this.errorMessage = null;
+		}
+	};
+});
+
+services.factory('successService',function(){
+	return {
+		successMessage: null,
+		setSuccess: function(msg){
+			this.successMessage = msg;
+		},
+		clear: function(){
+			this.successMessage = null;
+		}
+	};
+});
+
+services.factory('infoService',function(){
+	return {
+		infoMessage: null,
+		setInfo: function(msg){
+			this.infoMessage = msg;
+		},
+		clear: function(){
+			this.infoMessage = null;
+		}
+	};
+});
+
+/*Error Handling end*/
+
+
+/*Angular template - start*/
+<body ng-app="error">
+	<div ng-controller="errorCtlr">
+		<div class="row">
+			<div alert-success alertmessage="successService.successMessage"></div>
+		</div>
+		
+		<div class="row">
+			<div alert-error alertmessage="errorService.errorMessage"></div>
+		</div>
+		
+		<div class="row">
+			<div alert-error alertmessage="infoService.infoMessage"></div>
+		</div>
+	</div>
+</body>
+/*Angular template - end*/
+
+/*controller - start*/
+var errorApp = angular.module("error",['error.services','error.directives']);
+errorApp.controller("errorCtlr",['$scope','errorService','succesService','infoService',function($scope,errorService,successService,infoService){
+	//setting the error, success and info messages
+	errorService.setError("Invalid Page");
+	successService.setSuccess("Valid Page");
+	infoService.setInfo("Welcome");
+	
+	//clearing the error, success and info messages
+	errorService.clear("Invalid Page");
+	successService.clear("Valid Page");
+	infoService.clear("Welcome");
+}]);
+/*controller - end*/
+
