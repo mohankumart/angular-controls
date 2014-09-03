@@ -1,0 +1,188 @@
+/**
+ * Controller file
+ */
+
+var d3App = angular.module("d3App",['ngRoute','d3.directives','filterModule']);
+
+d3App.config(['$routeProvider','$locationProvider', '$httpProvider', function($routeProvider,$locationProvider, $httpProvider){
+	$routeProvider.
+	    when('/',{
+			controller: 'repeatCtlr',
+			templateUrl: '/repeat.html',
+		}).when('/customdirective/',{
+			controller: 'customdirectiveCtlr',
+			templateUrl: '/customdirective.html'
+	    }).when('/isolateScope/',{
+			controller: 'isolateScopeCtlr',
+			templateUrl: '/isolateScope.html'
+	    }).when('/linkdemo/',{
+			controller: 'linkDemoCtlr',
+			templateUrl: '/linkDemo.html'
+	    }).when('/tabsdemo/',{
+			controller: 'tabsDemoCtlr',
+			templateUrl: '/tabsDemo.html'
+	    }).when('/d3chapter3/',{
+			controller: 'd3chapter3DemoCtlr',
+			templateUrl: '/d3chapter3.html'
+	    }).when('/demosamples/',{
+			controller: 'demoSamplesCtlr',
+			templateUrl: '/demoSamples.html'
+	    }).when('/login/',{
+			controller: 'loginCtlr',
+			templateUrl: '/loginForm.html'
+	    }).otherwise({
+			redirectTo: '/'
+		});
+		$locationProvider.html5Mode(true);
+		$locationProvider.hashPrefix('!');
+}]);
+
+d3App.controller("d3Ctlr",['$scope',function($scope){
+	
+}]);
+
+d3App.controller("repeatCtlr",['$scope',function($scope){
+	$scope.yahoos = ['A','B'];
+	$scope.test = "hello";
+}]);
+
+d3App.controller("customdirectiveCtlr",['$scope',function($scope){
+	$scope.customer = {
+      name: 'Naomi',
+      address: '1600 Amphitheatre'
+    };
+}]);
+
+d3App.controller("isolateScopeCtlr",['$scope',function($scope){
+	$scope.mohan = {
+      name: 'Mohan',
+      address: 'Bangalore'
+    };
+	
+	$scope.kumar = {
+      name: 'kumar',
+      address: 'Lakkavaram'
+    };
+}]);
+
+d3App.controller("linkDemoCtlr",['$scope',function($scope){
+	$scope.format = 'M/d/yy h:mm:ss a';
+}]);
+
+d3App.controller("tabsDemoCtlr",['$scope',function($scope){
+	
+}]);
+
+d3App.controller("d3chapter3DemoCtlr",['$scope',function($scope){
+	
+}]);
+
+
+d3App.controller("demoSamplesCtlr",['$scope',function($scope){
+	
+}]);
+
+d3App.controller("loginCtlr",['$scope',function($scope){
+	
+}]);
+
+//Backend code
+
+/**
+ * Server
+ */
+
+var application_root = __dirname,
+	express = require( 'express' ),
+	path = require( 'path' );
+
+var app = express();
+
+
+app.use( express.static( path.join( application_root, 'web')));
+
+
+
+var port = 4726;
+
+app.all('/', function(req, res, next) {
+    res.sendFile('index.html', { root: path.join( application_root, 'web') });
+});
+
+app.all('/repeat', function(req, res, next) {
+    res.sendFile('index.html', { root: path.join( application_root, 'web') });
+});
+
+app.all('/customdirective', function(req, res, next) {
+    res.sendFile('index.html', { root: path.join( application_root, 'web') });
+});
+
+app.all('/isolateScope', function(req, res, next) {
+    res.sendFile('index.html', { root: path.join( application_root, 'web') });
+});
+
+app.all('/linkdemo', function(req, res, next) {
+    res.sendFile('index.html', { root: path.join( application_root, 'web') });
+});
+
+app.all('/tabsdemo', function(req, res, next) {
+    res.sendFile('index.html', { root: path.join( application_root, 'web') });
+});
+
+app.all('/d3chapter3', function(req, res, next) {
+    res.sendFile('index.html', { root: path.join( application_root, 'web') });
+});
+
+app.all('/demosamples', function(req, res, next) {
+    res.sendFile('index.html', { root: path.join( application_root, 'web') });
+});
+
+app.all('/login', function(req, res, next) {
+    res.sendFile('index.html', { root: path.join( application_root, 'web') });
+});
+
+
+app.listen(port, function(){
+	console.log( 'Express server listening on port %d in %s mode', port, app.settings.env );
+});
+
+//index.html
+
+<!DOCTYPE html>
+<html ng-app="d3App">
+	<head>
+		<meta charset="UTF-8">
+		<title>Mohan - Angular Directives</title>
+		<link rel="stylesheet" href="/scripts/lib/d3/css/styles.css"/>
+		<link rel="stylesheet" href="/scripts/lib/bootstrap/css/bootstrap.css"/>
+			
+		<script src="/scripts/lib/jQuery/jquery-2.0.2.js"></script>
+		<script src="/scripts/lib/angular/angular.js"></script>
+		<script src="/scripts/lib/angular/angular-route.js"></script>
+		<script src="/scripts/lib/bootstrap/js/bootstrap.js"></script>
+		<script src="/scripts/lib/bootstrap/js/bootstrap.js"></script>
+		<script src="/scripts/lib/d3/d3.js"></script>
+		
+		<script src="/scripts/localization/english_local.js"></script>
+		<script src="/scripts/filters/filters.js"></script>
+		<script src="/scripts/controllers/controllers.js"></script>
+		<script src="/scripts/directives/directives.js"></script>
+		<link>
+	</head>
+	<body ng-view ng-controller="d3Ctlr"></body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
