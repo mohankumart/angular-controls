@@ -1,0 +1,50 @@
+/* Directives for form error handling - start*/
+
+var directives = angular.module('error.directives', []); 
+
+directives.directive('formError',['$parse',function($parse){
+	return {
+		restrict: 'A',
+		template: "<accordion class=\"formError\" close-others=\"oneAtATime\">"+
+		"<accordion-group is-open=\"isFormErrorOpen\">"+
+		"<accordion-heading>"+
+			"{{formErrorHeading}}<i class=\"pull-left glyphicon formError\" ng-class=\"{'glyphicon-chevron-down': isFormErrorOpen, 'glyphicon-chevron-right': !isFormErrorOpen}\"></i>"+
+			 "</accordion-heading>"+
+		"<div ng-repeat=\"error in formErrors\">" +
+			"<div class=\"row\"><div class=\"col-sm-3\">{{error.name}}</div><div class=\"col-sm-9\">{{error.value}}</div></div>"+ 
+		"</div>"+
+	"</accordion-group>"+
+	"</accordion>",
+		link: function(scope, element, attrs){
+			scope.oneAtATime = true;
+			scope.isFormErrorOpen = true;
+		}	
+	};
+}]);
+
+/* Directives for form error handling - end*/
+
+<body np-app="error">
+	<div ng-controller="formErrorCtlr">
+		<div class="row">
+		    <div ng-if="isformError" form-error></div>
+		</div>
+	</div>
+</body>
+
+/*controller - start*/
+var errorApp = angular.module("error",['error.services','error.directives']);
+errorApp.controller("formErrorCtlr",['$scope','errorService','succesService','infoService',function($scope,errorService,successService,infoService){
+	if(result.isError){
+	  $scope.isformError = true;
+	  $scope.formErrorHeading = result.errors.__all__;
+	  $scope.formErrors = [];
+	  $.each(result.errors,function(key,value){
+		  if(key !== '__all__'){
+			  $scope.formErrors.push({'name':key,'value':value});
+		  }
+	  });
+	}
+}]);
+/*controller - end*/
+    
