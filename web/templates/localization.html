@@ -1,0 +1,67 @@
+/Demonstration localization using angular/
+
+
+var filterModule = angular.module('filterModule',['LoginFormTexts']);
+
+filterModule.filter('Email',function($locale, providedValue){
+	var EmailFilter = function(input){
+		return providedValue.Email;
+	};
+	return EmailFilter;
+});
+
+filterModule.filter('Password',function($locale, providedValue){
+	var PasswordFilter = function(input){
+		return providedValue.Password;
+	};
+	return PasswordFilter;
+});
+
+filterModule.filter('Login',function($locale, providedValue){
+	var LoginFilter = function(input){
+		return providedValue.Login;
+	};
+	return LoginFilter;
+});
+
+//Chinese version
+var settingsProvider = angular.module("LoginFormTexts", []);
+
+settingsProvider.value("providedValue", {
+    Email: "中國哲學書電子化計劃",
+    Password: "中國哲學書電子化計劃",
+    Login: "中國哲學書電子化計劃"
+});
+
+//English Version
+var settingsProvider = angular.module("LoginFormTexts", []);
+
+settingsProvider.value("providedValue", {
+    Email: "Email",
+    Password: "Password",
+    Login: "Login"
+});
+
+var errorApp = angular.module("error",['error.services','error.directives','filterModule']);
+<div class="container" style="margin-top:50px">
+<form class="form-horizontal" role="form">
+  <div class="form-group">
+    <label for="inputEmail3" class="col-sm-2 control-label">{{Email | Email}}</label>
+    <div class="col-sm-4">
+      <input type="email" class="form-control" id="inputEmail3" placeholder="{{Email | Email}}">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="inputPassword3" class="col-sm-2 control-label">{{Password | Password}}</label>
+    <div class="col-sm-4">
+      <input type="password" class="form-control" id="inputPassword3" placeholder="{{Password | Password}}">
+    </div>
+  </div>
+  <div class="form-group">
+    <div class="col-sm-offset-2 col-sm-10">
+      <button type="submit" class="btn btn-default">{{Login | Login}}</button>
+    </div>
+  </div>
+</form>
+</div>
+
